@@ -1,0 +1,16 @@
+PRODUCT_RELEASE_NAME := CPH1911
+
+$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
+
+PRODUCT_DEVICE     := CPH1911
+PRODUCT_NAME       := twrp_CPH1911
+PRODUCT_BRAND      := OPPO
+PRODUCT_MODEL      := OPPO F11
+PRODUCT_MANUFACTURER := OPPO
+
+PRODUCT_GMS_CLIENTID_BASE := android-oppo
+
+TARGET_SCREEN_WIDTH  := 1080
+TARGET_SCREEN_HEIGHT := 2340
+
+$(call inherit-product, device/oppo/CPH1911/device.mk)
