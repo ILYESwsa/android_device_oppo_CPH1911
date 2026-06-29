@@ -12,17 +12,12 @@ jobs:
     env:
       MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
       MANIFEST_BRANCH: twrp-12.1
-      DEVICE_TREE_URL: https://github.com/${{ github.repository_owner }}/android_device_oppo_CPH1911
+      DEVICE_TREE_URL: https://github.com/ILYESwsa/android_device_oppo_CPH1911
       DEVICE_TREE_BRANCH: main
-      DEVICE_PATH: device/oppo/CPH1911
       DEVICE_NAME: CPH1911
       MAKEFILE_NAME: twrp_CPH1911
-      BUILD_TARGET: recovery
 
     steps:
-      - name: Checkout device tree
-        uses: actions/checkout@v4
-
       - name: Free up disk space
         run: |
           sudo apt-get clean
@@ -63,20 +58,25 @@ jobs:
             -u ${{ env.MANIFEST_URL }} \
             -b ${{ env.MANIFEST_BRANCH }}
 
-      - name: Sync TWRP source
+      - name: Add device tree to local manifest
+        run: |
+          mkdir -p workspace/.repo/local_manifests
+          cat > workspace/.repo/local_manifests/roomservice.xml << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <manifest>
+            <project name="ILYESwsa/android_device_oppo_CPH1911"
+                     path="device/oppo/CPH1911"
+                     remote="github"
+                     revision="main" />
+          </manifest>
+          EOF
+
+      - name: Sync TWRP source + device tree
         run: |
           cd workspace
           repo sync -c -j$(nproc --all) \
             --force-sync --no-clone-bundle --no-tags \
             --optimized-fetch --prune
-
-      - name: Clone device tree
-        run: |
-          cd workspace
-          mkdir -p device/oppo
-          git clone ${{ env.DEVICE_TREE_URL }} \
-            -b ${{ env.DEVICE_TREE_BRANCH }} \
-            device/oppo/CPH1911
 
       - name: Build TWRP recovery
         run: |
@@ -85,11 +85,6 @@ jobs:
           source build/envsetup.sh
           lunch ${{ env.MAKEFILE_NAME }}-eng
           mka recoveryimage -j$(nproc --all)
-
-      - name: Get image info
-        run: |
-          ls -lh workspace/out/target/product/${{ env.DEVICE_NAME }}/recovery.img
-          file workspace/out/target/product/${{ env.DEVICE_NAME }}/recovery.img
 
       - name: Upload recovery.img
         uses: actions/upload-artifact@v4
