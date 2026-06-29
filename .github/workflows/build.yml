@@ -73,9 +73,10 @@ jobs:
       - name: Clone device tree
         run: |
           cd workspace
+          mkdir -p device/oppo
           git clone ${{ env.DEVICE_TREE_URL }} \
             -b ${{ env.DEVICE_TREE_BRANCH }} \
-            ${{ env.DEVICE_PATH }}
+            device/oppo/CPH1911
 
       - name: Build TWRP recovery
         run: |
